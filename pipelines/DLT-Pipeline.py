@@ -20,11 +20,17 @@ import dlt
 
 # COMMAND ----------
 
+# get data path from the DLT Pipeline configuration so we can test the pipeline with smaller amount of data
+default_json_path = "/databricks-datasets/wikipedia-datasets/data-001/clickstream/raw-uncompressed-json/"
+json_path = spark.conf.get("my_etl.data_path", default_json_path)
+print(f"Loading data from {json_path}")
+
+# COMMAND ----------
+
 @dlt.table(
    comment="The raw wikipedia clickstream dataset, ingested from /databricks-datasets."
 )
 def clickstream_raw():
-  json_path = "/databricks-datasets/wikipedia-datasets/data-001/clickstream/raw-uncompressed-json/2015_2_clickstream.json"
   return spark.read.format("json").load(json_path)
 
 # COMMAND ----------
