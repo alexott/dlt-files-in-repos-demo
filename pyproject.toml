@@ -17,6 +17,7 @@ chispa = "^0.9.2"
 nutter = "^0.1.34"
 pytest-cov = "^4.0.0"
 pytest = "^7.2.0"
+dbx = "^0.8.7"
 
 [build-system]
 requires = ["poetry-core"]
