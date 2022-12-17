@@ -1005,20 +1005,21 @@ files = [
 
 [[package]]
 name = "nutter"
-version = "0.1.34"
+version = "0.1.35"
 description = "A databricks notebook testing library"
 category = "dev"
 optional = false
-python-versions = ">=3.5.2"
+python-versions = ">=3.7.0"
 files = [
-    {file = "nutter-0.1.34-py3-none-any.whl", hash = "sha256:ec95132b17282d340ca0e7bfbd72fda16dc7888bc2913f71d459c9e449e53ee8"},
-    {file = "nutter-0.1.34.tar.gz", hash = "sha256:20cf0b020ff536c0d760794c8dc6b8cb5dabf30591654fb1c403208a27446540"},
+    {file = "nutter-0.1.35-py3-none-any.whl", hash = "sha256:e1dff1dad1539d0a504f4f5eae0d82944e84e77e6216bcb48ac3a72bbbea8c54"},
+    {file = "nutter-0.1.35.tar.gz", hash = "sha256:e9ea76f99cf8616326a299b448ceea5015f22243a395b3ff93a205025652fdf0"},
 ]
 
 [package.dependencies]
 databricks-api = "*"
 fire = "*"
 junit-xml = "*"
+py4j = "*"
 requests = "*"
 
 [[package]]

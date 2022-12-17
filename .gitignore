@@ -128,3 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 *~
+/terraform/azuredevops/.terraform/
+/terraform/azuredevops/terraform.tfstate*
+/test-local.xml
+/terraform/azuredevops/terraform.tfvars

@@ -1,0 +1,161 @@
+# Grab variables from the specific variable group and
+# determine sourceBranchName (avoids SourchBranchName=merge
+# for PR)
+variables:
+  - group: 'DLT Files In Repos Testing'
+  - name: 'branchName'
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/') }}:
+      value: $[ replace(variables['Build.SourceBranch'], 'refs/heads/', '') ]
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/pull/') }}:
+      value: $[ replace(variables['System.PullRequest.SourceBranch'], 'refs/heads/', '') ]
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - '*'
+  paths:
+    exclude:
+      - README.md
+      - LICENSE
+      - images
+      - terraform
+      - .github
+
+#  tags:
+#    include:
+#      - v*.*
+#      - prod
+
+# This need an additional debugging
+# pr:
+#   branches:
+#     include:
+#       - master
+#       - releases
+#   paths:
+#     exclude:
+#       - README.md
+#       - images
+      
+stages:
+- stage: onPush
+  condition: |
+    and(
+      ne(variables['Build.SourceBranch'], 'refs/heads/releases'),
+      not(startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
+    )
+  jobs:
+  - job: onPushJob
+    pool:
+      vmImage: 'ubuntu-20.04'
+
+    steps:
+    - script: env | sort
+      displayName: 'Environment / Context'
+
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.8'
+      inputs:
+        versionSpec: 3.8
+
+    - checkout: self
+      displayName: 'Checkout & Build.Reason: $(Build.Reason) & Build.SourceBranchName: $(Build.SourceBranchName)'
+
+    # - script: |
+    #     python -m pip install --upgrade pip nutter
+    #     # this is because of the old dependency inside Nutter
+    #     python -m pip install --upgrade databricks-cli
+    #   displayName: 'Install dependencies'
+
+  - script: |
+      curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+      export PATH=$PATH:$HOME/.poetry/bin
+      poetry install --no-root
+    displayName: 'Install dependencies'
+
+  - script: echo "##vso[task.prependpath]$HOME/.poetry/bin"
+    displayName: Add poetry to PATH
+    
+# https://docs.databricks.com/dev-tools/api/latest/repos.html
+# this is simplification, and won't work with concurrent commits. Ideally it should be a
+# separate repo for each commit
+    - script: |
+        echo "Checking out the $(branchName) branch"
+        poetry run databricks repos update --path $(STAGING_DIRECTORY) --branch "$(branchName)"
+      env:
+        DATABRICKS_HOST: $(DATABRICKS_HOST)
+        DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+      displayName: 'Update Staging project'
+
+    - script: |
+        poetry run pytest tests/unit-local --junit-xml=test-local.xml --cov
+      displayName: 'Execute local tests'
+      
+    - script: |
+        poetry run nutter run "$(STAGING_DIRECTORY)/tests/unit-notebooks/" --cluster_id $(CLUSTER_ID) --recursive --junit_report --timeout 500
+      env:
+        DATABRICKS_HOST: $(DATABRICKS_HOST)
+        DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+      displayName: 'Execute Nutter tests'
+
+# TODO: add launching of dbx with DLT pipeline for integration test
+      
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/test-*.xml' 
+        failTaskOnFailedTests: true
+
+# - stage: onRelease
+#   condition: |
+#     eq(variables['Build.SourceBranch'], 'refs/heads/releases')
+#   jobs:
+#   - job: onReleaseJob
+#     pool:
+#       vmImage: 'ubuntu-20.04'
+
+#     steps:
+#       - script: env | sort
+#         displayName: 'Environment / Context'
+
+#       - task: UsePythonVersion@0
+#         displayName: 'Use Python 3.8'
+#         inputs:
+#           versionSpec: 3.8
+
+#       - checkout: self
+#         persistCredentials: true
+#         clean: true
+#         displayName: 'Checkout & Build.Reason: $(Build.Reason) & Build.SourceBranchName: $(Build.SourceBranchName)'
+
+#       - script: |
+#           python -m pip install --upgrade pip nutter
+#           # this is because of the old dependency inside Nutter
+#           python -m pip install --upgrade databricks-cli
+#         displayName: 'Install dependencies'
+
+#       - script: |
+#           echo "Checking out the releases branch"
+#           databricks repos update --path $(STAGING_DIRECTORY) --branch "$(Build.SourceBranchName)"
+#         env:
+#           DATABRICKS_HOST: $(DATABRICKS_HOST)
+#           DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+#         displayName: 'Update Staging repository'
+
+# # We can do a separate set of the tests for release branches
+#       - script: |
+#           nutter run "$(STAGING_DIRECTORY)/unit-tests/" --cluster_id $(CLUSTER_ID) --recursive --junit_report --timeout 500
+#         env:
+#           DATABRICKS_HOST: $(DATABRICKS_HOST)
+#           DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+#         displayName: 'Execute Nutter tests on release'
+
+#       - task: PublishTestResults@2
+#         condition: succeededOrFailed()
+#         inputs:
+#           testResultsFormat: 'JUnit'
+#           testResultsFiles: '**/test-*.xml' 
+#           failTaskOnFailedTests: true
+
