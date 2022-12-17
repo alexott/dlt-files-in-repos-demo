@@ -68,14 +68,14 @@ stages:
     #     python -m pip install --upgrade databricks-cli
     #   displayName: 'Install dependencies'
 
-  - script: |
-      curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
-      export PATH=$PATH:$HOME/.poetry/bin
-      poetry install --no-root
-    displayName: 'Install dependencies'
+    - script: |
+        curl -sSL https://install.python-poetry.org | python -
+        export PATH=$PATH:$HOME/.poetry/bin
+        poetry install --no-root
+      displayName: 'Install dependencies'
 
-  - script: echo "##vso[task.prependpath]$HOME/.poetry/bin"
-    displayName: Add poetry to PATH
+    - script: echo "##vso[task.prependpath]$HOME/.poetry/bin"
+      displayName: Add poetry to PATH
     
 # https://docs.databricks.com/dev-tools/api/latest/repos.html
 # this is simplification, and won't work with concurrent commits. Ideally it should be a
