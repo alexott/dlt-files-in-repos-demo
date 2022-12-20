@@ -66,8 +66,13 @@ resource "azuredevops_variable_group" "vg" {
   }
 
   variable {
-    name = "test_dlt_pipeline_name"
-    value = module.dlt_prod.test_pipeline_name
+    name  = "production_directory"
+    value = databricks_repo.dlt_files_in_repos_in_prod.path
+  }
+
+  variable {
+    name = "test_dlt_pipeline_id"
+    value = module.dlt_prod.test_pipeline_id
   }
 
 }
