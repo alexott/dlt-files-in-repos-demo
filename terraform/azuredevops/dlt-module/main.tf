@@ -1,29 +1,34 @@
 terraform {
   required_providers {
     databricks = {
-      source  = "databricks/databricks"
+      source = "databricks/databricks"
     }
   }
 }
 
-
 variable "main_pipeline_name" {
-  type = string
+  type        = string
   description = "Name of the main DLT pipeline"
 }
 
 variable "main_pipeline_repo_path" {
-  type = string
+  type        = string
   description = "Path to repo with main DLT pipeline"
 }
 
+variable "main_pipeline_is_production" {
+  type        = bool
+  description = "Set to false if production pipeline should run in Development mode"
+  default     = true
+}
+
 variable "test_pipeline_name" {
-  type = string
+  type        = string
   description = "Name of the integration test DLT pipeline"
 }
 
 variable "test_pipeline_repo_path" {
-  type = string
+  type        = string
   description = "Path to repo with integration test DLT pipeline"
 }
 

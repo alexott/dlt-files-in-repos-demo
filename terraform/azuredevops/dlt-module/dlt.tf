@@ -1,5 +1,5 @@
 resource "databricks_pipeline" "dlt_files_in_repos_demo" {
-  name    = var.main_pipeline_name
+  name = var.main_pipeline_name
   library {
     notebook {
       path = "${var.main_pipeline_repo_path}/pipelines/DLT-Pipeline"
@@ -13,7 +13,7 @@ resource "databricks_pipeline" "dlt_files_in_repos_demo" {
 }
 
 resource "databricks_pipeline" "dlt_files_in_repos_integration_test" {
-  name    = var.test_pipeline_name
+  name = var.test_pipeline_name
   library {
     notebook {
       path = "${var.test_pipeline_repo_path}/tests/integration/DLT-Pipeline-Test"

@@ -21,6 +21,6 @@ variable "devops_project_name" {
 
 variable "dlt_name_prefix" {
   description = "Prefix for DLT pipelines name"
-  type = string
-  default = "DLT + Files in Repos"
+  type        = string
+  default     = "DLT + Files in Repos"
 }

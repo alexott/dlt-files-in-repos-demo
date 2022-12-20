@@ -62,12 +62,6 @@ stages:
     - checkout: self
       displayName: 'Checkout & Build.Reason: $(Build.Reason) & Build.SourceBranchName: $(Build.SourceBranchName)'
 
-    # - script: |
-    #     python -m pip install --upgrade pip nutter
-    #     # this is because of the old dependency inside Nutter
-    #     python -m pip install --upgrade databricks-cli
-    #   displayName: 'Install dependencies'
-
     - script: |
         curl -sSL https://install.python-poetry.org | python -
         export PATH=$PATH:$HOME/.poetry/bin
@@ -77,9 +71,8 @@ stages:
     - script: echo "##vso[task.prependpath]$HOME/.poetry/bin"
       displayName: Add poetry to PATH
     
-# https://docs.databricks.com/dev-tools/api/latest/repos.html
-# this is simplification, and won't work with concurrent commits. Ideally it should be a
-# separate repo for each commit
+# https://docs.databricks.com/dev-tools/api/latest/repos.html.
+# this is simplification, and won't work with concurrent commits. Ideally there should be a separate repository for each commit
     - script: |
         echo "Checking out the $(branchName) branch"
         poetry run databricks repos update --path $(STAGING_DIRECTORY) --branch "$(branchName)"

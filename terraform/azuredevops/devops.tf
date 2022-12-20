@@ -71,12 +71,12 @@ resource "azuredevops_variable_group" "vg" {
   }
 
   variable {
-    name = "test_dlt_pipeline_id"
+    name  = "test_dlt_pipeline_id"
     value = module.dlt_prod.test_pipeline_id
   }
 
   variable {
-    name = "test_dlt_pipeline_name"
+    name  = "test_dlt_pipeline_name"
     value = module.dlt_prod.test_pipeline_name
   }
 
