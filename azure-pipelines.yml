@@ -99,7 +99,25 @@ stages:
         DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
       displayName: 'Execute Nutter tests'
 
-# TODO: add launching of dbx with DLT pipeline for integration test
+    - script: |
+        poetry run databricks pipelines start --pipeline-id $(TEST_DLT_PIPELINE_ID) --full-refresh
+        sleep 15
+        while true; do
+          DLT_STATUS=$(poetry run databricks pipelines get --pipeline-id $(TEST_DLT_PIPELINE_ID) |jq -r '.latest_updates[0].state')
+          if [ "$DLT_STATUS" = "COMPLETED" -o "$DLT_STATUS" = "CANCELED" -o "$DLT_STATUS" = "FAILED" ]; then
+            echo "Exiting loop with status '$DLT_STATUS'"
+            break
+          fi
+          echo "DLT pipeline status is '$DLT_STATUS'. Waiting..."
+          sleep 15
+        done
+        if [ "$DLT_STATUS" != "COMPLETED" ]; then
+          exit 1
+        fi
+      env:
+        DATABRICKS_HOST: $(DATABRICKS_HOST)
+        DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+      displayName: 'Execute DLT Integration Test pipeline'
       
     - task: PublishTestResults@2
       condition: succeededOrFailed()
