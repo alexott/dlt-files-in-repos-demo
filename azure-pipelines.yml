@@ -51,9 +51,6 @@ stages:
       vmImage: 'ubuntu-20.04'
 
     steps:
-    - script: env | sort
-      displayName: 'Environment / Context'
-
     - task: UsePythonVersion@0
       displayName: 'Use Python 3.8'
       inputs:
@@ -93,6 +90,8 @@ stages:
       displayName: 'Execute Nutter tests'
 
     - script: |
+        DLT_START=$SECONDS
+        DLT_START_ISO=$(date --iso-8601=seconds)
         poetry run databricks pipelines start --pipeline-id $(TEST_DLT_PIPELINE_ID) --full-refresh
         sleep 15
         while true; do
@@ -104,6 +103,18 @@ stages:
           echo "DLT pipeline status is '$DLT_STATUS'. Waiting..."
           sleep 15
         done
+        DLT_FINISH=$SECONDS
+        DLT_ERRORS=$(( "$DLT_STATUS" = "FAILED" ? 1 : 0 ))
+        DLT_SKIPPED=$(( "$DLT_STATUS" = "CANCELED" ? 1 : 0 ))
+        echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><testsuites><testsuite tests=\"1\" skipped=\"$DLT_SKIPPED\" errors=\"$DLT_ERRORS\" failures=\"$DLT_ERRORS\" time=\"$((DLT_FINISH-DLT_START))\" timestamp=\"${DLT_START_ISO}\">" > test-dlt.xml
+        echo "<testcase classname=\"DLTIntegration\" name=\"${TEST_DLT_PIPELINE_NAME}\" time=\"$((DLT_FINISH-DLT_START))\">" >> test-dlt.xml
+        if [ "$DLT_STATUS" = "FAILED" ]; then
+          DLT_UPDATE_ID=$(poetry run databricks pipelines get --pipeline-id $(TEST_DLT_PIPELINE_ID) |jq -r '.latest_updates[0].update_id')
+          echo "<failure message=\"DLT test failure\">Pipeline update with ID ${DLT_UPDATE_ID} has failed</failure>" >> test-dlt.xml
+        elif [ "$DLT_STATUS" = "CANCELED" ]; then
+          echo '<skipped />' >> test-dlt.xml
+        fi
+        echo '</testcase></testsuite></testsuites>' >> test-dlt.xml
         if [ "$DLT_STATUS" != "COMPLETED" ]; then
           exit 1
         fi
@@ -119,54 +130,92 @@ stages:
         testResultsFiles: '**/test-*.xml' 
         failTaskOnFailedTests: true
 
-# - stage: onRelease
-#   condition: |
-#     eq(variables['Build.SourceBranch'], 'refs/heads/releases')
-#   jobs:
-#   - job: onReleaseJob
-#     pool:
-#       vmImage: 'ubuntu-20.04'
+# Separate pipeline for releases branch
+# Right now it's identical to the onPush stage, but we can add more tests if necessary
+- stage: onRelease
+  condition: |
+    eq(variables['Build.SourceBranch'], 'refs/heads/releases')
+  jobs:
+  - job: onReleaseJob
+    pool:
+      vmImage: 'ubuntu-20.04'
 
-#     steps:
-#       - script: env | sort
-#         displayName: 'Environment / Context'
+    steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.8'
+      inputs:
+        versionSpec: 3.8
 
-#       - task: UsePythonVersion@0
-#         displayName: 'Use Python 3.8'
-#         inputs:
-#           versionSpec: 3.8
+    - checkout: self
+      displayName: 'Checkout & Build.Reason: $(Build.Reason) & Build.SourceBranchName: $(Build.SourceBranchName)'
 
-#       - checkout: self
-#         persistCredentials: true
-#         clean: true
-#         displayName: 'Checkout & Build.Reason: $(Build.Reason) & Build.SourceBranchName: $(Build.SourceBranchName)'
+    - script: |
+        curl -sSL https://install.python-poetry.org | python -
+        export PATH=$PATH:$HOME/.poetry/bin
+        poetry install --no-root
+      displayName: 'Install dependencies'
 
-#       - script: |
-#           python -m pip install --upgrade pip nutter
-#           # this is because of the old dependency inside Nutter
-#           python -m pip install --upgrade databricks-cli
-#         displayName: 'Install dependencies'
+    - script: echo "##vso[task.prependpath]$HOME/.poetry/bin"
+      displayName: Add poetry to PATH
+    
+# https://docs.databricks.com/dev-tools/api/latest/repos.html.
+# this is simplification, and won't work with concurrent commits. Ideally there should be a separate repository for each commit
+    - script: |
+        echo "Checking out the $(branchName) branch"
+        poetry run databricks repos update --path $(STAGING_DIRECTORY) --branch "$(branchName)"
+      env:
+        DATABRICKS_HOST: $(DATABRICKS_HOST)
+        DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+      displayName: 'Update Staging project'
 
-#       - script: |
-#           echo "Checking out the releases branch"
-#           databricks repos update --path $(STAGING_DIRECTORY) --branch "$(Build.SourceBranchName)"
-#         env:
-#           DATABRICKS_HOST: $(DATABRICKS_HOST)
-#           DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-#         displayName: 'Update Staging repository'
+    - script: |
+        poetry run pytest tests/unit-local --junit-xml=test-local.xml --cov
+      displayName: 'Execute local tests'
+      
+    - script: |
+        poetry run nutter run "$(STAGING_DIRECTORY)/tests/unit-notebooks/" --cluster_id $(CLUSTER_ID) --recursive --junit_report --timeout 500
+      env:
+        DATABRICKS_HOST: $(DATABRICKS_HOST)
+        DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+      displayName: 'Execute Nutter tests'
 
-# # We can do a separate set of the tests for release branches
-#       - script: |
-#           nutter run "$(STAGING_DIRECTORY)/unit-tests/" --cluster_id $(CLUSTER_ID) --recursive --junit_report --timeout 500
-#         env:
-#           DATABRICKS_HOST: $(DATABRICKS_HOST)
-#           DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-#         displayName: 'Execute Nutter tests on release'
-
-#       - task: PublishTestResults@2
-#         condition: succeededOrFailed()
-#         inputs:
-#           testResultsFormat: 'JUnit'
-#           testResultsFiles: '**/test-*.xml' 
-#           failTaskOnFailedTests: true
-
+    - script: |
+        DLT_START=$SECONDS
+        DLT_START_ISO=$(date --iso-8601=seconds)
+        poetry run databricks pipelines start --pipeline-id $(TEST_DLT_PIPELINE_ID) --full-refresh
+        sleep 15
+        while true; do
+          DLT_STATUS=$(poetry run databricks pipelines get --pipeline-id $(TEST_DLT_PIPELINE_ID) |jq -r '.latest_updates[0].state')
+          if [ "$DLT_STATUS" = "COMPLETED" -o "$DLT_STATUS" = "CANCELED" -o "$DLT_STATUS" = "FAILED" ]; then
+            echo "Exiting loop with status '$DLT_STATUS'"
+            break
+          fi
+          echo "DLT pipeline status is '$DLT_STATUS'. Waiting..."
+          sleep 15
+        done
+        DLT_FINISH=$SECONDS
+        DLT_ERRORS=$(( "$DLT_STATUS" = "FAILED" ? 1 : 0 ))
+        DLT_SKIPPED=$(( "$DLT_STATUS" = "CANCELED" ? 1 : 0 ))
+        echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><testsuites><testsuite tests=\"1\" skipped=\"$DLT_SKIPPED\" errors=\"$DLT_ERRORS\" failures=\"$DLT_ERRORS\" time=\"$((DLT_FINISH-DLT_START))\" timestamp=\"${DLT_START_ISO}\">" > test-dlt.xml
+        echo "<testcase classname=\"DLTIntegration\" name=\"${TEST_DLT_PIPELINE_NAME}\" time=\"$((DLT_FINISH-DLT_START))\">" >> test-dlt.xml
+        if [ "$DLT_STATUS" = "FAILED" ]; then
+          DLT_UPDATE_ID=$(poetry run databricks pipelines get --pipeline-id $(TEST_DLT_PIPELINE_ID) |jq -r '.latest_updates[0].update_id')
+          echo "<failure message=\"DLT test failure\">Pipeline update with ID ${DLT_UPDATE_ID} has failed</failure>" >> test-dlt.xml
+        elif [ "$DLT_STATUS" = "CANCELED" ]; then
+          echo '<skipped />' >> test-dlt.xml
+        fi
+        echo '</testcase></testsuite></testsuites>' >> test-dlt.xml
+        if [ "$DLT_STATUS" != "COMPLETED" ]; then
+          exit 1
+        fi
+      env:
+        DATABRICKS_HOST: $(DATABRICKS_HOST)
+        DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+      displayName: 'Execute DLT Integration Test pipeline'
+      
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/test-*.xml' 
+        failTaskOnFailedTests: true
