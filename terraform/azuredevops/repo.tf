@@ -18,7 +18,7 @@ resource "databricks_repo" "dlt_files_in_repos_in_user_home" {
 resource "databricks_repo" "dlt_files_in_repos_in_staging" {
   depends_on = [databricks_git_credential.global]
   url        = azuredevops_git_repository.repository.remote_url
-  path       = "${data.databricks_current_user.me.repos}/ndlt-files-tf-staging"
+  path       = "${data.databricks_current_user.me.repos}/dlt-files-tf-staging"
   branch     = "main"
 }
 
@@ -26,5 +26,5 @@ resource "databricks_repo" "dlt_files_in_repos_in_prod" {
   depends_on = [databricks_git_credential.global]
   url        = azuredevops_git_repository.repository.remote_url
   path       = "${data.databricks_current_user.me.repos}/dlt-files-tf-prod"
-  branch     = "main"
+  branch     = "releases"
 }
