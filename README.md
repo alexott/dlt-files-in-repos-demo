@@ -1,2 +1,35 @@
-# dlt-files-in-repos-demo
-Demonstration of using Files in Repos with Databricks Delta Live Tables
+This repository contains a demo of using [Files in Repos](https://docs.databricks.com/repos/work-with-notebooks-other-files.html#work-with-python-and-r-modules) functionality with [Databricks Delta Live Tables (DLT)](https://docs.databricks.com/workflows/delta-live-tables/index.html) to perform unit & integration testing of DLT pipelines.
+
+More detailed description is available in the blog post [Delta Live Tables Recipes: implementing unit & integration tests](https://alexott.blogspot.com/2022/12/delta-live-tables-recipes-implementing.html). 
+
+TODO: add table of content
+
+# Setup instructions
+
+:construction: Work in progress...
+
+:warning: Setup instructions describe process of performing CI/CD using Azure DevOps (ADO), but similar thing could be implemented with any CI/CD technology.
+
+There are two ways of setting up everything:
+
+1. using Terraform - it's the easiest way of getting everything configured in a short time.  Just follow instructions in [terraform/azuredevops/](terraform/azuredevops/) folder.  :warning: This doesn't include creation of release pipeline as there is no REST API and Terraform resource for it.
+2. manually - follow instructions below to create all necessary objects.
+
+
+## Create necessary Databricks Repos checkouts
+
+:construction: Work in progress...
+
+
+## Create DLT pipelines
+
+:construction: Work in progress...
+
+## Create ADO build pipeline
+
+:construction: Work in progress...
+
+## Create ADO release pipeline
+
+:construction: Work in progress...
+
