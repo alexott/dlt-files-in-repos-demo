@@ -5,7 +5,7 @@ resource "databricks_pipeline" "dlt_files_in_repos_demo" {
       path = "${var.main_pipeline_repo_path}/pipelines/DLT-Pipeline"
     }
   }
-  development = true
+  development = var.main_pipeline_is_development
   cluster {
     num_workers = 1
     label       = "default"

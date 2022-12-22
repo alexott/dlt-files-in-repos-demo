@@ -16,10 +16,10 @@ variable "main_pipeline_repo_path" {
   description = "Path to repo with main DLT pipeline"
 }
 
-variable "main_pipeline_is_production" {
+variable "main_pipeline_is_development" {
   type        = bool
   description = "Set to false if production pipeline should run in Development mode"
-  default     = true
+  default     = false
 }
 
 variable "test_pipeline_name" {
