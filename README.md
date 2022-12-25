@@ -29,6 +29,15 @@ There are two ways of setting up everything:
 
 :construction: Work in progress...
 
+The ADO build pipeline consists of the two stages:
+
+- `onPush` is executed on push to any Git branch except `releases` branch and version tags.  This stage only runs & reports unit tests results (both local & notebooks).
+- `onRelease` is executed only on commits to the `releases` branch, and in addition to the unit tests it will execute a DLT pipeline with integration test (see image).
+
+![Stages of ADO build pipeline](images/cicd-stages.png)
+
+
+
 ## Create ADO release pipeline
 
 :construction: Work in progress...
