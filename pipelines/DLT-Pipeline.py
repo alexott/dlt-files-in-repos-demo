@@ -3,14 +3,6 @@
 
 # COMMAND ----------
 
-# DBTITLE 1,Temporary workaround until top-level repos directory is added
-import sys
-only_repos_dirs = set(['/'.join(p.split('/')[0:5]) for p in sys.path if p.startswith("/Workspace/Repos/")])
-[sys.path.append(p) for p in only_repos_dirs if p not in sys.path]
-# print(sys.path)
-
-# COMMAND ----------
-
 # import helper functions from the current repository
 import helpers.columns_helpers as ch
 
