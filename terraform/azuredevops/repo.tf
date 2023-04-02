@@ -16,7 +16,7 @@ resource "databricks_repo" "dlt_files_in_repos_in_user_home" {
 
   lifecycle {
     ignore_changes = [
-       branch,
+      branch,
     ]
   }
 }
@@ -29,7 +29,7 @@ resource "databricks_repo" "dlt_files_in_repos_in_staging" {
 
   lifecycle {
     ignore_changes = [
-       branch,
+      branch,
     ]
   }
 }
