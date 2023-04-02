@@ -1,6 +1,5 @@
 # Grab variables from the specific variable group and
-# determine sourceBranchName (avoids SourchBranchName=merge
-# for PR)
+# determine sourceBranchName (avoids SourchBranchName=merge for PR)
 variables:
   - group: 'DLT Files In Repos Testing'
   - name: 'branchName'
@@ -21,23 +20,8 @@ trigger:
       - images
       - terraform
       - .github
+      - azure-pipelines-release.yml
 
-#  tags:
-#    include:
-#      - v*.*
-#      - prod
-
-# This need an additional debugging
-# pr:
-#   branches:
-#     include:
-#       - master
-#       - releases
-#   paths:
-#     exclude:
-#       - README.md
-#       - images
-      
 stages:
 - stage: onPush
   condition: |

@@ -1,0 +1,39 @@
+# Grab variables from the specific variable group
+variables:
+  - group: 'DLT Files In Repos Testing'
+  - name: 'branchName'
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/') }}:
+      value: $[ replace(variables['Build.SourceBranch'], 'refs/heads/', '') ]
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/pull/') }}:
+      value: $[ replace(variables['System.PullRequest.SourceBranch'], 'refs/heads/', '') ]
+
+trigger: none
+
+resources:
+  pipelines:
+  - pipeline: release
+    source: 'DLT Files In Repos Build Pipeline'
+    trigger: 
+      stages:
+      - onRelease
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - script: |
+      echo "Installing databricks-cli"
+      pip install databricks-cli
+    env:
+      DATABRICKS_HOST: $(DATABRICKS_HOST)
+      DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+    displayName: 'Update Production repository'
+
+# https://docs.databricks.com/dev-tools/api/latest/repos.html.
+  - script: |
+      echo "Checking out the $(branchName) branch"
+      databricks repos update --path $(PRODUCTION_DIRECTORY) --branch "$(branchName)"
+    env:
+      DATABRICKS_HOST: $(DATABRICKS_HOST)
+      DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+    displayName: 'Update Production repository'

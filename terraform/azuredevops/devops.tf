@@ -33,6 +33,26 @@ resource "azuredevops_build_definition" "build" {
   variable_groups = [azuredevops_variable_group.vg.id]
 }
 
+resource "azuredevops_build_definition" "release" {
+  project_id = azuredevops_project.project.id
+  name       = "DLT Files In Repos Release Pipeline"
+
+  ci_trigger {
+    use_yaml = true
+  }
+
+  repository {
+    repo_type   = "TfsGit"
+    repo_id     = azuredevops_git_repository.repository.id
+    branch_name = azuredevops_git_repository.repository.default_branch
+    yml_path    = "azure-pipelines-release.yml"
+  }
+
+  variable_groups = [azuredevops_variable_group.vg.id]
+}
+
+
+
 resource "databricks_token" "pat_for_devops" {
   comment          = "Azure DevOps DLT Files In Repos demo (10 days)"
   lifetime_seconds = 864000

@@ -2,11 +2,11 @@ terraform {
   required_providers {
     azuredevops = {
       source  = "microsoft/azuredevops"
-      version = "0.3.0"
+      version = "0.4.0"
     }
     databricks = {
       source  = "databricks/databricks"
-      version = "1.7.0"
+      version = "1.14.0"
     }
   }
 }

@@ -13,6 +13,12 @@ resource "databricks_repo" "dlt_files_in_repos_in_user_home" {
   url        = azuredevops_git_repository.repository.remote_url
   path       = "${data.databricks_current_user.me.repos}/dlt-files-tf-dev"
   branch     = "main"
+
+  lifecycle {
+    ignore_changes = [
+       branch,
+    ]
+  }
 }
 
 resource "databricks_repo" "dlt_files_in_repos_in_staging" {
@@ -20,6 +26,12 @@ resource "databricks_repo" "dlt_files_in_repos_in_staging" {
   url        = azuredevops_git_repository.repository.remote_url
   path       = "${data.databricks_current_user.me.repos}/dlt-files-tf-staging"
   branch     = "main"
+
+  lifecycle {
+    ignore_changes = [
+       branch,
+    ]
+  }
 }
 
 resource "databricks_repo" "dlt_files_in_repos_in_prod" {
