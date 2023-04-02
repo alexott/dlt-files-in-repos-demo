@@ -22,12 +22,8 @@ pool:
 
 steps:
   - script: |
-      echo "Installing databricks-cli"
       pip install databricks-cli
-    env:
-      DATABRICKS_HOST: $(DATABRICKS_HOST)
-      DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-    displayName: 'Update Production repository'
+    displayName: 'Install databricks-cli'
 
 # https://docs.databricks.com/dev-tools/api/latest/repos.html.
   - script: |
