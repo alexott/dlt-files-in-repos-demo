@@ -17,7 +17,7 @@ resource "azuredevops_git_repository" "repository" {
 
 resource "azuredevops_build_definition" "build" {
   project_id = azuredevops_project.project.id
-  name       = "DLT Files In Repos Build Pipeline"
+  name       = "DLT Files In Repos Staging Test"
 
   ci_trigger {
     use_yaml = true
@@ -35,7 +35,7 @@ resource "azuredevops_build_definition" "build" {
 
 resource "azuredevops_build_definition" "release" {
   project_id = azuredevops_project.project.id
-  name       = "DLT Files In Repos Release Pipeline"
+  name       = "DLT Files In Repos Production Release"
 
   ci_trigger {
     use_yaml = true
@@ -44,7 +44,7 @@ resource "azuredevops_build_definition" "release" {
   repository {
     repo_type   = "TfsGit"
     repo_id     = azuredevops_git_repository.repository.id
-    branch_name = azuredevops_git_repository.repository.default_branch
+    branch_name = "releases"
     yml_path    = "azure-pipelines-release.yml"
   }
 

@@ -12,7 +12,7 @@ trigger: none
 resources:
   pipelines:
   - pipeline: release
-    source: 'DLT Files In Repos Build Pipeline'
+    source: 'DLT Files In Repos Staging Test'
     trigger: 
       stages:
       - onRelease
