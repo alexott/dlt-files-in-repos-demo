@@ -18,8 +18,11 @@ There are two ways of setting up everything:
 
 ## Create necessary Databricks Repos checkouts
 
-:construction: Work in progress...
+In this example we're using three [checkouts of our sample repository](https://docs.databricks.com/repos/git-operations-with-repos.html#add-a-repo-connected-to-a-remote-repo):
 
+1. Development: is used for actual development of the new code, running tests before committing the code, etc.
+1. Staging: will be used to run tests on commits to branches and/or pull requests.  This checkout will be updated to the actual branch to which commit happened.  We're using one checkout just for simplicity, but in real-life we'll need to create such checkouts automatically to allow multiple tests to run in parallel. 
+1. Production: is used to keep the production code - this checkout always will be on the `releases` branch, and will be updated only when commit happens to that branch and all tests are passed.
 
 ## Create DLT pipelines
 
