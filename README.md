@@ -1,6 +1,6 @@
 This repository contains a demo of using [Files in Repos](https://docs.databricks.com/repos/work-with-notebooks-other-files.html#work-with-python-and-r-modules) functionality with [Databricks Delta Live Tables (DLT)](https://docs.databricks.com/workflows/delta-live-tables/index.html) to perform unit & integration testing of DLT pipelines.
 
-More detailed description is available in the blog post [Delta Live Tables Recipes: implementing unit & integration tests](https://alexott.blogspot.com/2022/12/delta-live-tables-recipes-implementing.html). 
+More detailed description is available in the blog post [Applying software development & DevOps best practices to Delta Live Table pipelines](https://www.databricks.com/blog/applying-software-development-devops-best-practices-delta-live-table-pipelines). 
 
 TODO: add table of content
 
