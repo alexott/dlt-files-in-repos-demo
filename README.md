@@ -1,8 +1,21 @@
 This repository contains a demo of using [Files in Repos](https://docs.databricks.com/repos/work-with-notebooks-other-files.html#work-with-python-and-r-modules) functionality with [Databricks Delta Live Tables (DLT)](https://docs.databricks.com/workflows/delta-live-tables/index.html) to perform unit & integration testing of DLT pipelines.
 
+* [The development workflow](#the-development-workflow)
+* [Setup instructions](#setup-instructions)
+   * [Create necessary Databricks Repos checkouts](#create-necessary-databricks-repos-checkouts)
+   * [Create DLT pipelines](#create-dlt-pipelines)
+   * [Create Databricks cluster](#create-databricks-cluster)
+   * [Create ADO build pipeline](#create-ado-build-pipeline)
+   * [Create ADO release pipeline](#create-ado-release-pipeline)
+   
+# The development workflow
+
+The development workflow is organized as on following image:
+
+![DLT development workflow](images/cicd-process.png)
+
 More detailed description is available in the blog post [Applying software development & DevOps best practices to Delta Live Table pipelines](https://www.databricks.com/blog/applying-software-development-devops-best-practices-delta-live-table-pipelines). 
 
-TODO: add table of content
 
 # Setup instructions
 
@@ -26,9 +39,7 @@ In this example we're using three [checkouts of our sample repository](https://d
 
 Here is an example of repos created with Terraform:
 
-TODO: add image
-
-
+![Databricks repos](images/repos.png)
 
 ## Create DLT pipelines
 
@@ -41,8 +52,13 @@ We need to create a few DLT pipelines for our work:
 
 Here is an example of pipelines created with Terraform:
 
-TODO: add image
+![Databricks repos](images/dlt-pipelines.png)
 
+## Create Databricks cluster
+
+If you decide to run notebooks with tests located in `tests/unit-notebooks` directory, you will need to [create a Databricks cluster](https://docs.databricks.com/clusters/configure.html) that will be used by the Nutter library.  To speedup tests, attach the `nutter` & `chispa` libraries to the created cluster.
+
+If you don't want to run these tests, comment out in the `azure-pipelines.yml` the block with `displayName` "Execute Nutter tests".
 
 ## Create ADO build pipeline
 
