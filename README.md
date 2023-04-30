@@ -24,9 +24,25 @@ In this example we're using three [checkouts of our sample repository](https://d
 1. Staging: will be used to run tests on commits to branches and/or pull requests.  This checkout will be updated to the actual branch to which commit happened.  We're using one checkout just for simplicity, but in real-life we'll need to create such checkouts automatically to allow multiple tests to run in parallel. 
 1. Production: is used to keep the production code - this checkout always will be on the `releases` branch, and will be updated only when commit happens to that branch and all tests are passed.
 
+Here is an example of repos created with Terraform:
+
+TODO: add image
+
+
+
 ## Create DLT pipelines
 
-:construction: Work in progress...
+We need to create a few DLT pipelines for our work:
+
+1. for main code that is used for development - use only `pipelines/DLT-Pipeline.py` notebook from the development repository.
+1. (optional) for integration test that could be run as part of development - from the development repository use main code notebook (`pipelines/DLT-Pipeline.py`) together with integration test notebook (`tests/integration/DLT-Pipeline-Test.py`).
+1. for integration test running as part of CI/CD pipeline - similar to the previous item, but use the staging repository.
+1. for production pipeline - use only `pipelines/DLT-Pipeline.py` notebook from the production repository.
+
+Here is an example of pipelines created with Terraform:
+
+TODO: add image
+
 
 ## Create ADO build pipeline
 
