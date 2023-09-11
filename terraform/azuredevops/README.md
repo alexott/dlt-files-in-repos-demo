@@ -19,9 +19,4 @@ The code performs following actions:
 * Creates an Azure DevOps variable group that contains all parameters that are used by the build pipeline.
 * Creates an Azure DevOps build pipeline using `azure-pipelines.yaml` file from the cloned repository.
 
-After code is executed, you will have fully configured repositories & build pipeline.  Follow instructions from the [top-level README](../../README.md) to setup release pipeline.
-
-
-Limitations:
-
-* This code doesn't setup release pipeline as no corresponding functionality is available in Azure DevOps.
+After code is executed, you will have fully configured repositories, build & release pipelines.
