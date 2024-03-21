@@ -132,3 +132,4 @@ dmypy.json
 /terraform/azuredevops/terraform.tfstate*
 /test-local.xml
 /terraform/azuredevops/terraform.tfvars
+/.databricks/
