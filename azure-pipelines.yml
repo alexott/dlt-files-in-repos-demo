@@ -36,9 +36,9 @@ stages:
 
     steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.8'
+      displayName: 'Use Python 3.10'
       inputs:
-        versionSpec: 3.8
+        versionSpec: 3.10
 
     - checkout: self
       displayName: 'Checkout & Build.Reason: $(Build.Reason) & Build.SourceBranchName: $(Build.SourceBranchName)'
@@ -92,9 +92,9 @@ stages:
 
     steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.8'
+      displayName: 'Use Python 3.10'
       inputs:
-        versionSpec: 3.8
+        versionSpec: 3.10
 
     - checkout: self
       displayName: 'Checkout & Build.Reason: $(Build.Reason) & Build.SourceBranchName: $(Build.SourceBranchName)'
